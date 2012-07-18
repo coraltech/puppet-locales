@@ -1,0 +1,5 @@
+
+class locales::default {
+  $locales_ensure = 'present'
+  $locales        = [ 'en_US.UTF-8 UTF-8' ]
+}

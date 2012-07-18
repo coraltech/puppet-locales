@@ -1,12 +1,33 @@
 class locales::params {
+
+  include locales::default
+
+  #-----------------------------------------------------------------------------
+  # General configurations
+
+  if $::hiera_exists {
+    $locales_ensure = hiera('locales_ensure', $locales::default::locales_ensure)
+    $locales        = hiera('locales', $locales::default::locales)
+  }
+  else {
+    $locales_ensure = $locales::default::locales_ensure
+    $locales        = $locales::default::locales
+  }
+
+  #-----------------------------------------------------------------------------
+  # Operating system specific configurations
+
   case $::operatingsystem {
-    /(Ubuntu|Debian)/: {
-      $package = 'locales'
-      $config_file = '/etc/locale.gen'
-      $locale_gen_cmd = '/usr/sbin/locale-gen'
+    debian, ubuntu: {
+      $os_locales_package     = 'locales'
+
+      $os_config_file         = '/etc/locale.gen'
+      $os_locale_gen_command  = '/usr/sbin/locale-gen'
+
+      $os_locale_gen_template = 'locales/locale.gen.erb'
     }
     default: {
-      fail("Unsupported platform: ${::operatingsystem}")
+      fail("The locales module is not currently supported on ${::operatingsystem}")
     }
   }
 }

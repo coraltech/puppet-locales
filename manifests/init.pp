@@ -11,10 +11,6 @@
 #     Ensure if present or absent.
 #     Default: present
 #
-#   [*autoupgrade*]
-#     Upgrade package automatically, if there is a newer version.
-#     Default: false
-#
 #   [*package*]
 #     Name of the package.
 #     Only set this, if your platform is not supported or you know, what you're doing.
@@ -42,48 +38,38 @@
 #   }
 #
 # [Remember: No empty lines between comments and class definition]
-class locales(
-  $locales = [ 'en_US.UTF-8 UTF-8', 'de_DE.UTF-8 UTF-8', ],
-  $ensure = 'present',
-  $autoupgrade = false,
-  $package = $locales::params::package,
-  $config_file = $locales::params::config_file,
-  $locale_gen_cmd = $locales::params::locale_gen_cmd
+class locales (
+
+  $locales             = $locales::params::locales,
+  $package             = $locales::params::os_locales_package,
+  $ensure              = $locales::params::locales_ensure,
+  $config_file         = $locales::params::os_config_file,
+  $locale_gen_command  = $locales::params::os_locale_gen_command,
+  $locale_gen_template = $locales::params::os_locale_gen_template,
+
 ) inherits locales::params {
 
-  case $ensure {
-    /(present)/: {
-      if $autoupgrade == true {
-        $package_ensure = 'latest'
-      } else {
-        $package_ensure = 'present'
-      }
-    }
-    /(absent)/: {
-      $package_ensure = 'absent'
-    }
-    default: {
-      fail('ensure parameter must be present or absent')
-    }
+  #-----------------------------------------------------------------------------
+  # Installation
+
+  package { 'locales':
+    name   => $package,
+    ensure => $ensure,
   }
 
-  package { $package:
-    ensure => $package_ensure,
-  }
+  #-----------------------------------------------------------------------------
+  # Configuration
 
-  file { $config_file:
-    ensure  => $ensure,
-    owner   => 'root',
-    group   => 'root',
-    mode    => 0644,
-    content => template('locales/locale.gen.erb'),
-    require => Package[$package],
+  file { 'locales-config':
+    path    => $config_file,
+    content => template($locale_gen_template),
+    require => Package['locales'],
     notify  => Exec['locale-gen'],
   }
 
   exec { 'locale-gen':
-    command     => $locale_gen_cmd,
+    command     => $locale_gen_command,
     refreshonly => true,
-    require     => Package[$package],
+    require     => Package['locales'],
   }
 }
