@@ -5,7 +5,7 @@ class locales::params {
   #-----------------------------------------------------------------------------
   # General configurations
 
-  if $::hiera_exists {
+  if $::hiera_ready {
     $locales_ensure = hiera('locales_ensure', $locales::default::locales_ensure)
     $locales        = hiera('locales', $locales::default::locales)
   }
