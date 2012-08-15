@@ -40,12 +40,12 @@
 # [Remember: No empty lines between comments and class definition]
 class locales (
 
+  $package             = $locales::params::package,
+  $ensure              = $locales::params::ensure,
+  $config_file         = $locales::params::config_file,
+  $locale_gen_command  = $locales::params::locale_gen_command,
+  $locale_gen_template = $locales::params::locale_gen_template,
   $locales             = $locales::params::locales,
-  $package             = $locales::params::os_locales_package,
-  $ensure              = $locales::params::locales_ensure,
-  $config_file         = $locales::params::os_config_file,
-  $locale_gen_command  = $locales::params::os_locale_gen_command,
-  $locale_gen_template = $locales::params::os_locale_gen_template,
 
 ) inherits locales::params {
 
